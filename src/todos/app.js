@@ -1,4 +1,11 @@
+import todoStore from '../store/todo.store';
 import html from './app.html?raw';
+import { renderTodos } from './use-cases';
+
+const elementIds = {
+    TodoList: '.todo-list',
+    NewTodoInput: '#new-todo-input',
+}
 
 /**
  * 
@@ -7,11 +14,29 @@ import html from './app.html?raw';
 
 export const App = ( elementId ) => {
 
-    // cuando la funcion app() se llama
+    const returnTodos = () => {
+        const todos = todoStore.getTodos( todoStore.getCurrentFilter() );
+        renderTodos( elementIds.TodoList, todos);
+
+    }
+
+    // when the function is call
     (() => {
         const app = document.createElement('div');
         app.innerHTML = html;
         document.querySelector(elementId).append( app );
-
+        returnTodos();
     })();
+
+    // References HTML
+    const newDescriptionInput = document.querySelector( elementIds.NewTodoInput );
+
+    newDescriptionInput.addEventListener('keyup', ( event ) => {
+        if ( event.keycode !== 13 ) return;
+        if ( event.target.value.trim().length === 0 ) return;
+
+        todoStore.addTodo( event.target.value );
+        returnTodos();
+
+    })
 }
