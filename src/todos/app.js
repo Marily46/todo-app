@@ -30,13 +30,23 @@ export const App = ( elementId ) => {
 
     // References HTML
     const newDescriptionInput = document.querySelector( elementIds.NewTodoInput );
+    const todoListUL = document.querySelector( elementIds.TodoList );
 
     newDescriptionInput.addEventListener('keyup', ( event ) => {
-        if ( event.keycode !== 13 ) return;
+        if ( event.keyCode !== 13 ) return;
         if ( event.target.value.trim().length === 0 ) return;
 
         todoStore.addTodo( event.target.value );
         returnTodos();
+        event.target.value = '';
+    })
+
+    todoListUL.addEventListener('click' , ( event ) => {
+        const element = event.target.closest('[data-id]');
+        todoStore.toggleTodo( element.getAttribute('data-id') );
+        returnTodos();
+
+
 
     })
 }

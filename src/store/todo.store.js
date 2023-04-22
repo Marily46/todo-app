@@ -48,19 +48,23 @@ const getTodos = ( filter = Filters.All ) => {
  */
 const addTodo = ( description ) => {
     if ( !description ) throw new Error('Description is requerid');
-    state.todos.push( new Todo(description) );
+    state.todos.push( new Todo(description) ); 
 }
 
 
-const toggleTodo = ( todoId) => {
-    state.todos = state.todos.map( todo => {
-        if ( todo.id === todoId ) {
-            todo.done = !todo.done;
-        } else {
-            return todo;
-        }
-    } )
-}
+const toggleTodo = (todoId) => {
+    const todoIndex = state.todos.findIndex((todo) => todo.id === todoId);
+    if (todoIndex === -1) {
+        throw new Error('Todo not found');
+    }
+    const updatedTodo = { ...state.todos[todoIndex], done: !state.todos[todoIndex].done };
+    state.todos = [
+        ...state.todos.slice(0, todoIndex),
+        updatedTodo,
+        ...state.todos.slice(todoIndex + 1),
+    ];
+};
+
 
 const deleteTodo = ( todoId) => {
     state.todos = state.todos.filter( todo => todo.id !== todoId );
