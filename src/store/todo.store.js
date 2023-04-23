@@ -1,53 +1,55 @@
 import { Todo } from '../todos/models/todo.model';
 
-const Filters = {
+export const Filters = {
     All: 'all',
     Completed: 'Completed',
-    Pending: 'pending'
+    Pending: 'Pending'
 }
 
 const state = {
     todos: [
-        new Todo('El alma desalmada'),
-        new Todo('Las leyes del Universo'),
-        new Todo('El todo en conjunto'),
-        new Todo('Poderes de la realidad'),
+        new Todo('El universo en una cáscara de nuez'),
+        new Todo('El gran diseño'),
+        new Todo('La teoría del Todo'),
+        new Todo('Apocalipsis'),
+        new Todo('La naturaleza del espacio y el tiempo'),
     ],
     filter: Filters.All,
 }
 
+
 const initStore = () => {
     loadStore();
-    console.log('initstore 🦀');
+    console.log('InitStore 🥑');
 }
 
 const loadStore = () => {
-    if (!localStorage.getItem('state')) return;
+    if( !localStorage.getItem('state') ) return;
 
-    const { todos = [], filter = Filters.All } = JSON.parse( localStorage.getItem('state'));
+    const { todos = [], filter = Filters.All } = JSON.parse( localStorage.getItem('state') );
     state.todos = todos;
     state.filter = filter;
 }
 
-const saveStateLocalStorage = () => {
-
-    localStorage.setItem('state', JSON.stringify(state));
+const saveStateToLocalStorage = () =>{
+    localStorage.setItem('state', JSON.stringify(state) );
 }
 
+
 const getTodos = ( filter = Filters.All ) => {
+    
     switch( filter ) {
         case Filters.All:
             return [...state.todos];
-
+        
         case Filters.Completed:
-            return state.todos.filter( todo => todo.done);
+            return state.todos.filter( todo => todo.done );
 
         case Filters.Pending:
             return state.todos.filter( todo => !todo.done );
-        
-        default:
-            throw new Error(`Option ${ filter } is not valid.`)
 
+        default:
+            throw new Error(`Option ${ filter } is not valid.`);
     }
 }
 
@@ -56,62 +58,60 @@ const getTodos = ( filter = Filters.All ) => {
  * @param {String} description 
  */
 const addTodo = ( description ) => {
-    if ( !description ) throw new Error('Description is requerid');
-    state.todos.push( new Todo(description) ); 
-    saveStateLocalStorage();
+    if ( !description ) throw new Error('Description is required');
+    state.todos.push( new Todo(description) );
+
+    saveStateToLocalStorage();
 }
 
+/**
+ * 
+ * @param {String} todoId
+ */
+const toggleTodo = ( todoId ) => {
+    
+    state.todos = state.todos.map( todo => {
+        if( todo.id === todoId ) {
+            todo.done = !todo.done;
+        }
+        return todo;
+    });
 
-const toggleTodo = (todoId) => {
-    const todoIndex = state.todos.findIndex((todo) => todo.id === todoId);
-    if (todoIndex === -1) {
-        throw new Error('Todo not found');
-    }
-    const updatedTodo = { ...state.todos[todoIndex], done: !state.todos[todoIndex].done };
-    state.todos = [
-        ...state.todos.slice(0, todoIndex),
-        updatedTodo,
-        ...state.todos.slice(todoIndex + 1),
-    ];
+    saveStateToLocalStorage();
+}
 
-    saveStateLocalStorage();
-};
-
-
-const deleteTodo = ( todoId) => {
-    state.todos = state.todos.filter( todo => todo.id !== todoId );
-    saveStateLocalStorage();
+const deleteTodo = ( todoId ) => {
+    state.todos = state.todos.filter( todo => todo.id !== todoId  );
+    saveStateToLocalStorage();
 }
 
 const deleteCompleted = () => {
     state.todos = state.todos.filter( todo => !todo.done );
-    saveStateLocalStorage();
+    saveStateToLocalStorage();
 }
 
 /**
  * 
  * @param {Filters} newFilter 
  */
-const setFilter = ( newFilter = Filters.All) => {
-    if (Object.keys(Filters).includes( newFilter )){
-        state.filter = newFilter;
-    } else {
-        console.log('Error is not includes the filter')
-    }
-    saveStateLocalStorage();
+const setFilter = ( newFilter = Filters.All ) => {
+    state.filter = newFilter;
+    saveStateToLocalStorage();
 }
 
 const getCurrentFilter = () => {
     return state.filter;
 }
+
+
 export default {
     addTodo,
     deleteCompleted,
     deleteTodo,
     getCurrentFilter,
+    getTodos,
     initStore,
     loadStore,
     setFilter,
     toggleTodo,
-    getTodos,
 }

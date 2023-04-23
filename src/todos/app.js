@@ -1,68 +1,101 @@
-import todoStore from '../store/todo.store';
 import html from './app.html?raw';
-import { renderTodos } from './use-cases';
+import todoStore, { Filters } from '../store/todo.store';
+import { renderTodos, renderPending } from './use-cases';
 
-const elementIds = {
-    clearCompletedButton: '.clear-completed',
+
+const ElementIDs = {
+    ClearCompletedButton: '.clear-completed',
     TodoList: '.todo-list',
     NewTodoInput: '#new-todo-input',
+    TodoFilters: '.filtro',
+    PendingCountLabel: '#pending-count',
 }
 
 /**
  * 
  * @param {String} elementId 
  */
-
 export const App = ( elementId ) => {
 
-    const returnTodos = () => {
+    const displayTodos = () => {
         const todos = todoStore.getTodos( todoStore.getCurrentFilter() );
-        renderTodos( elementIds.TodoList, todos);
-
+        renderTodos( ElementIDs.TodoList, todos );
+        updatePendingCount();
     }
 
-    // when the function is call
-    (() => {
+    const updatePendingCount = () => {
+        renderPending(ElementIDs.PendingCountLabel);
+    }
+
+    // Cuando la función App() se llama
+    (()=> {
         const app = document.createElement('div');
         app.innerHTML = html;
         document.querySelector(elementId).append( app );
-        returnTodos();
+        displayTodos();
     })();
 
-    // References HTML
-    const newDescriptionInput = document.querySelector( elementIds.NewTodoInput );
-    const todoListUL = document.querySelector( elementIds.TodoList );
-    const clearCompletedButton = document.querySelector( elementIds.clearCompletedButton);
 
+    // Referencias HTML
+    const newDescriptionInput = document.querySelector( ElementIDs.NewTodoInput );
+    const todoListUL = document.querySelector( ElementIDs.TodoList );
+    const clearCompletedButton = document.querySelector( ElementIDs.ClearCompletedButton );
+    const filtersLIs = document.querySelectorAll( ElementIDs.TodoFilters );
+
+    // Listeners
     newDescriptionInput.addEventListener('keyup', ( event ) => {
         if ( event.keyCode !== 13 ) return;
         if ( event.target.value.trim().length === 0 ) return;
 
         todoStore.addTodo( event.target.value );
-        returnTodos();
+        displayTodos();
         event.target.value = '';
-    })
+    });
 
-    todoListUL.addEventListener('click' , ( event ) => {
+    todoListUL.addEventListener('click', (event) => {
         const element = event.target.closest('[data-id]');
         todoStore.toggleTodo( element.getAttribute('data-id') );
-        returnTodos();
-    })
+        displayTodos();
+    });
 
-    todoListUL.addEventListener('click' , ( event ) => {
+    todoListUL.addEventListener('click', (event) => {
         const isDestroyElement = event.target.className === 'destroy';
         const element = event.target.closest('[data-id]');
-        if (!element || !isDestroyElement) return;
+        if ( !element || !isDestroyElement ) return;
+
         todoStore.deleteTodo( element.getAttribute('data-id') );
-        returnTodos();
-    })
+        displayTodos();
+    });
 
-    clearCompletedButton.addEventListener('click', () => {
-        console.log('button')
+    clearCompletedButton.addEventListener( 'click', () => {
         todoStore.deleteCompleted();
-        returnTodos();
-        
+        displayTodos();
+    });
 
-    })
+    filtersLIs.forEach( element => {
+
+        element.addEventListener('click', (element) => {
+            filtersLIs.forEach( el => el.classList.remove('selected') );
+            element.target.classList.add('selected');
+
+            switch( element.target.text ){
+                case 'Todos':
+                    todoStore.setFilter( Filters.All )
+                break;
+                case 'Pendientes':
+                    todoStore.setFilter( Filters.Pending )
+                break;
+                case 'Completados':
+                    todoStore.setFilter( Filters.Completed )
+                break;
+            }
+
+            displayTodos();
+
+        });
+
+
+    });
+
 
 }
